@@ -2,18 +2,26 @@ import pymupdf
 from pathlib import Path
 
 
-def extract_text_from_pdf(pdf_path):
-
-    pdf_path = Path(pdf_path)
-
-    # Check whether the PDF exists
-    if not pdf_path.is_file():
-        raise FileNotFoundError(f"PDF file not found: {pdf_path}")
+def extract_text_from_pdf(pdf_source):
 
     document = None
 
     try:
-        document = pymupdf.open(pdf_path)
+        if isinstance(pdf_source, bytes):
+            document = pymupdf.open(
+                stream=pdf_source,
+                filetype="pdf"
+            )
+
+        else:
+            pdf_path = Path(pdf_source)
+
+            if not pdf_path.is_file():
+                raise FileNotFoundError(
+                    f"PDF file not found: {pdf_path}"
+                )
+
+            document = pymupdf.open(pdf_path)
 
         extracted_text = ""
 
@@ -27,8 +35,13 @@ def extract_text_from_pdf(pdf_path):
 
         return extracted_text
 
+    except FileNotFoundError:
+        raise
+
     except Exception as error:
-        raise ValueError(f"Unable to process PDF: {error}") from error
+        raise ValueError(
+            f"Unable to process PDF: {error}"
+        ) from error
 
     finally:
         if document is not None:

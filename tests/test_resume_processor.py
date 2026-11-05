@@ -1,3 +1,5 @@
+from unittest import result
+
 from src.resume_processor import process_resume
 
 
@@ -14,8 +16,8 @@ def test_process_resume():
 
     assert result == {
         "Programming Languages": ["Python"],
-        "Backend": ["Django"],
-        "Frontend": ["React"],
-        "Databases": ["PostgreSQL"],
-        "AI and Machine Learning": ["Generative AI"]
+        "Backend Development": ["Django"],
+        "Frontend Development": ["React"],
+        "Databases and Storage": ["PostgreSQL"],
+        "Generative AI and LLMs": ["Generative AI"]
     }
