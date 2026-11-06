@@ -25,8 +25,8 @@ def test_process_resume_pdf(tmp_path):
 
     result = process_resume_pdf(str(pdf_path))
 
-    assert result["Programming Languages"] == ["Python"]
-    assert result["Backend Development"] == ["Django"]
-    assert result["Frontend Development"] == ["React"]
-    assert result["Databases and Storage"] == ["PostgreSQL"]
-    assert result["Generative AI and LLMs"] == ["Generative AI"]
+    assert result["skills"]["Programming Languages"] == ["Python"]
+    assert result["skills"]["Backend Development"] == ["Django"]
+    assert result["skills"]["Frontend Development"] == ["React"]
+    assert result["skills"]["Databases and Storage"] == ["PostgreSQL"]
+    assert result["skills"]["Generative AI and LLMs"] == ["Generative AI"]

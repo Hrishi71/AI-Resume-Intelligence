@@ -375,7 +375,41 @@ SKILL_ALIASES = {
 }
 
 
+SKILL_NORMALIZATION = {
+    # JWT
+    "JWT": "JWT Authentication",
+    "JWT Authentication": "JWT Authentication",
+    "JSON Web Token": "JWT Authentication",
 
+    # Access control
+    "RBAC": "Role-Based Access Control",
+    "Role-Based Access Control": "Role-Based Access Control",
+
+    # REST APIs
+    "REST": "RESTful APIs",
+    "RESTful APIs": "RESTful APIs",
+
+    # React
+    "React.js": "React",
+    "ReactJS": "React",
+    "React": "React",
+
+    # PostgreSQL
+    "Postgres": "PostgreSQL",
+    "Postgre": "PostgreSQL",
+    "PostgreSQL": "PostgreSQL",
+}
+
+SKILL_PRIMARY_CATEGORY = {
+    "JWT Authentication": "Security",
+    "Role-Based Access Control": "Security",
+    "RESTful APIs": "Backend Development",
+    "React": "Frontend Development",
+    "PostgreSQL": "Databases and Storage",
+}
+
+def normalize_skill(skill):
+    return SKILL_NORMALIZATION.get(skill, skill)
 
 
 
@@ -418,8 +452,6 @@ def matches_skill(text, skill):
     return False
 
 
-
-
 def find_skill_match(text, skill):
 
     terms = [skill] + SKILL_ALIASES.get(skill, [])
@@ -433,46 +465,101 @@ def find_skill_match(text, skill):
 
 
 def extract_skills(resume_text):
-    """
-    Extract unique canonical skill names
-    while preserving database order.
-    """
-
     detected_skills = []
 
     for category, skills in SKILL_DATABASE.items():
-
         for skill in skills:
 
             match = find_skill_match(resume_text, skill)
 
-            if match and skill not in detected_skills:
-                detected_skills.append(skill)
+            if match:
+                normalized_skill = normalize_skill(skill)
+
+                if normalized_skill not in detected_skills:
+                    detected_skills.append(normalized_skill)
 
     return detected_skills
 
 
 
 def extract_skills_by_category(resume_text):
-    """
-    Extract unique canonical skills and organize them
-    by their primary category.
-    """
-
     results = {}
+    seen_skills = set()
 
     for category, skills in SKILL_DATABASE.items():
 
-        detected = []
-
         for skill in skills:
-
             match = find_skill_match(resume_text, skill)
 
-            if match and skill not in detected:
-                detected.append(skill)
+            if not match:
+                continue
 
-        if detected:
-            results[category] = detected
+            normalized_skill = normalize_skill(skill)
+
+            if normalized_skill in seen_skills:
+                continue
+
+            primary_category = SKILL_PRIMARY_CATEGORY.get(
+                normalized_skill, category
+            )
+
+            results.setdefault(primary_category, [])
+            results[primary_category].append(normalized_skill)
+
+            seen_skills.add(normalized_skill)
 
     return results
+
+def extract_skill_evidence(resume_text):
+    evidence = {}
+
+    # Combine wrapped lines into complete text entries
+    combined_lines = []
+
+    for line in resume_text.splitlines():
+
+        line = line.strip()
+
+        if not line:
+            continue
+
+        if combined_lines and line[0].islower():
+            combined_lines[-1] += " " + line
+        else:
+            combined_lines.append(line)
+
+    # Split combined entries into sentences
+    sentences = []
+
+    for line in combined_lines:
+
+        line_sentences = re.split(r'(?<=[.!?])\s+', line)
+
+        for sentence in line_sentences:
+            sentence = sentence.strip()
+
+            if sentence:
+                sentences.append(sentence)
+
+    for sentence in sentences:
+        sentence = sentence.strip()
+
+        if not sentence:
+            continue
+
+        # Find skills in the current sentence
+        for category, skills in SKILL_DATABASE.items():
+            for skill in skills:
+
+                match = find_skill_match(sentence, skill)
+
+                if match:
+                    normalized_skill = normalize_skill(skill)
+
+                    if normalized_skill not in evidence:
+                        evidence[normalized_skill] = []
+
+                    if sentence not in evidence[normalized_skill]:
+                        evidence[normalized_skill].append(sentence)
+
+    return evidence

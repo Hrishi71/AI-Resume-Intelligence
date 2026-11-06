@@ -1,3 +1,4 @@
+
 import streamlit as st
 
 from src.resume_processor import process_resume_pdf
@@ -13,10 +14,9 @@ st.set_page_config(
 
 # Application heading
 st.title("📄 AI Resume Intelligence")
-
 st.write(
-    "Upload your resume to automatically identify "
-    "your technical skills."
+    "Upload your resume to extract candidate information "
+    "and identify technical skills."
 )
 
 st.divider()
@@ -48,13 +48,45 @@ if st.button(
 
         st.success("Resume analyzed successfully!")
 
+        # Separate extracted information
+        candidate_info = results["candidate_info"]
+        skills = results["skills"]
+
         # Calculate total extracted skills
         total_skills = sum(
-            len(skills)
-            for skills in results.values()
+            len(category_skills)
+            for category_skills in skills.values()
         )
 
-        st.subheader("Analysis Results")
+        st.divider()
+        st.header("Resume Analysis Results")
+
+        # Candidate information
+        st.subheader("👤 Candidate Information")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.write("**Name**")
+            st.write(candidate_info["name"] or "Not found")
+
+            st.write("**Email**")
+            st.write(candidate_info["email"] or "Not found")
+
+            st.write("**Phone**")
+            st.write(candidate_info["phone"] or "Not found")
+
+        with col2:
+            st.write("**LinkedIn**")
+            st.write(candidate_info["linkedin"] or "Not found")
+
+            st.write("**GitHub**")
+            st.write(candidate_info["github"] or "Not found")
+
+        st.divider()
+
+        # Skills overview
+        st.subheader("💻 Technical Skills")
 
         st.metric(
             label="Total Skills Found",
@@ -64,15 +96,17 @@ if st.button(
         # Display skills by category
         if total_skills > 0:
 
-            for category, skills in results.items():
+            for category, category_skills in skills.items():
 
-                if skills:
-                    st.subheader(category)
-                    st.write(", ".join(skills))
+                if category_skills:
+                    with st.expander(
+                        f"{category} ({len(category_skills)})",
+                        expanded=True
+                    ):
+                        st.write(", ".join(category_skills))
 
         else:
-            st.info("No matching skills were found.")
+            st.info("No matching technical skills were found.")
 
     except Exception as error:
-
         st.error(f"Unable to analyze resume: {error}")
