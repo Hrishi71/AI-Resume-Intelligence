@@ -51,6 +51,7 @@ if st.button(
         # Separate extracted information
         candidate_info = results["candidate_info"]
         skills = results["skills"]
+        skill_evidence = results.get("skill_evidence", {})
 
         # Calculate total extracted skills
         total_skills = sum(
@@ -93,6 +94,7 @@ if st.button(
             value=total_skills
         )
 
+
         # Display skills by category
         if total_skills > 0:
 
@@ -103,10 +105,29 @@ if st.button(
                         f"{category} ({len(category_skills)})",
                         expanded=True
                     ):
-                        st.write(", ".join(category_skills))
+
+                        for skill in category_skills:
+
+                            with st.expander(skill, expanded=False):
+
+                                evidence_sentences = skill_evidence.get(
+                                    skill, []
+                                )
+
+                                if evidence_sentences:
+                                    st.write("**Evidence from your resume:**")
+
+                                    for sentence in evidence_sentences:
+                                        st.write(f"- {sentence}")
+
+                                else:
+                                    st.info(
+                                        "No supporting sentence found in the resume."
+                                    )
 
         else:
             st.info("No matching technical skills were found.")
+
 
     except Exception as error:
         st.error(f"Unable to analyze resume: {error}")

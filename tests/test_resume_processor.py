@@ -41,3 +41,45 @@ def test_process_resume_extracts_unlabelled_name():
     assert result["candidate_info"]["name"] == (
         "Hrishikesh Anant Deshpande"
     )
+
+
+
+def test_process_resume_includes_skill_evidence():
+    resume_text = (
+        "Developed backend applications using Python and Django.\n"
+        "Built REST APIs using FastAPI."
+    )
+
+    result = process_resume(resume_text)
+
+    assert "skill_evidence" in result
+
+    evidence = result["skill_evidence"]
+
+    assert evidence["Python"] == [
+        {
+            "evidence": (
+                "Developed backend applications using Python and Django."
+            ),
+            "section": "unclassified"
+        }
+    ]
+
+    assert evidence["Django"][0]["section"] == "unclassified"
+    assert evidence["FastAPI"][0]["section"] == "unclassified"
+
+
+def test_process_resume_preserves_existing_output():
+    resume_text = (
+        "Developed applications using Python and Django."
+    )
+
+    result = process_resume(resume_text)
+
+    assert "candidate_info" in result
+    assert "skills" in result
+    assert "skill_evidence" in result
+
+    assert isinstance(result["candidate_info"], dict)
+    assert isinstance(result["skills"], dict)
+    assert isinstance(result["skill_evidence"], dict)
