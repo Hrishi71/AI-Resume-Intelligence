@@ -1,3 +1,6 @@
 streamlit
 pytest
 PyMuPDF
+google-genai==3.0.0
+pydantic==2.14.3
+python-dotenv==1.2.4

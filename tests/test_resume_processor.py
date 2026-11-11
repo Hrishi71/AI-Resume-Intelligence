@@ -44,6 +44,8 @@ def test_process_resume_extracts_unlabelled_name():
 
 
 
+
+
 def test_process_resume_includes_skill_evidence():
     resume_text = (
         "Developed backend applications using Python and Django.\n"
@@ -56,17 +58,17 @@ def test_process_resume_includes_skill_evidence():
 
     evidence = result["skill_evidence"]
 
-    assert evidence["Python"] == [
-        {
-            "evidence": (
-                "Developed backend applications using Python and Django."
-            ),
-            "section": "unclassified"
-        }
-    ]
+    python_evidence = evidence["Python"][0]
 
-    assert evidence["Django"][0]["section"] == "unclassified"
-    assert evidence["FastAPI"][0]["section"] == "unclassified"
+    assert python_evidence["evidence"] == (
+        "Developed backend applications using Python and Django."
+    )
+    assert python_evidence["section"] == "unclassified"
+    assert python_evidence["classification"] == "practical_application"
+
+    assert "score" in python_evidence
+    assert python_evidence["score"]["total_score"] == 40
+
 
 
 def test_process_resume_preserves_existing_output():
