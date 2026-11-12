@@ -2,7 +2,10 @@
 import streamlit as st
 
 from src.resume_processor import process_resume_pdf
-from src.llm.ui import render_gemini_evaluation
+from src.llm.ui import (
+    render_gemini_evaluation,
+    render_resume_assessment,
+)
 
 
 # --------------------------------------------------
@@ -281,6 +284,21 @@ if results is not None:
 
         else:
             st.info("No technical skills were detected.")
+
+            # --------------------------------------------------
+        # FULL RESUME AI ASSESSMENT
+        # --------------------------------------------------
+
+        st.divider()
+
+        st.subheader("AI-Powered Resume Assessment")
+
+        st.caption(
+            "Get a consolidated assessment of your technical "
+            "capabilities, experience, projects and resume quality."
+        )
+
+        render_resume_assessment(results)
 
     # --------------------------------------------------
     # CANDIDATE TAB
